@@ -4,24 +4,10 @@ from tokenizers.pre_tokenizers import WhitespaceSplit,Split,Sequence
 from tokenizers.models import WordLevel
 from tokenizers.processors import BertProcessing
 from tokenizers.trainers import WordLevelTrainer
-# from .SMILES import CANONICAL_SMILES_PATTERN
-from transformers import GPT2Tokenizer
-from transformers import AutoTokenizer
+from tokenizers.implementations import BaseTokenizer
+from . import CANONICAL_SMILES_PATTERN
+import torch
 
-ELEMENTS=[
-    "H","He","Li","Be","B","C","N","O","F","Ne","Na","Mg","Al","Si","P","S","Al","Ar","K","Ca",
-    "Sc","Ti","V","Cr","Mn","Fe","Co","Ni","Cu","Zn","Ga","Ge","As","Se","Br","Kr","Rb","Sr","Y","Zr",
-    "Nb","Mo","Tc","Ru","Rh","Pd","Ag","Cd","In","Sn","Sb","Te","I","Xe","Cs","Ba","La","Ce","Pr","Nd",
-    "Pm","Sm","Eu","Gd","Td","Dy","Ho","Er","Tm","Yb","Lu","Hf","Ta","W","Re","Os","Ir","Pt","Au","Hg",
-    "Tl","Pb","Bi","Po","At","Rn","Fr","Ra","Ac","Th","Pa","U","Np","Pu","Am","Cm","Bk","Cf","Es","Fm"
-    "Md","No","Lr","Rf","Db","Sg","Bh","Hs","Mt","Uuu","Uub"
-]
-CANONICAL_SMILES_PATTERN="\[.+?\]|"+"|".join(ele for ele in ELEMENTS if len(ele)==2)+"|."
-
-from tokenizers.implementations import BaseTokenizer,BertWordPieceTokenizer
-
-
-from tokenizers.implementations import BaseTokenizer,bert_wordpiece
 class SmiTokenizer(BaseTokenizer):
     def __init__(self,
                  vocab = None,
@@ -55,61 +41,61 @@ class SmiTokenizer(BaseTokenizer):
         if isinstance(files, str):
             files = [files]
         self._tokenizer.train(files, trainer=trainer)
-import torch
+
 
 
 def txt2pt(txt,pt,max_len,tokenizer):
-    tokenizer.enable_padding(length=max_len + 1, pad_id=3)
-    tokenizer.enable_truncation(max_len + 1)
-    db=[]
+    tokenizer.enable_padding(length=max_len, pad_id=3)
+    tokenizer.enable_truncation(max_len)
     with open(txt,"r") as f:
         db_i = torch.tensor([i.ids for i in tokenizer.encode_batch(f.read().split("\n"))], dtype=torch.int8)
         db=db_i[(db_i == 1).any(dim=1) & (db_i != 2).all(dim=1)]
         torch.save(db,pt)
 
+
 # t=SmiTokenizer()
 # t.train("ChEMBL.txt",vocab_size=64)
 # t.save("chembl.json",pretty=True)
-tokenizer=SmiTokenizer.from_file("chembl.json")
-txt2pt("ChEMBL.txt","chembl.pt",max_len=128,tokenizer=tokenizer)
-
-data=torch.load("chembl.pt")
-print(data.shape)
-
-
+# tokenizer=SmiTokenizer.from_file("chembl.json")
+# txt2pt("ChEMBL.txt","chembl.pt",max_len=128,tokenizer=tokenizer)
+#
+# data=torch.load("chembl.pt")
+# print(data.shape)
 
 
-##############################################################
-
-from torch.utils.data import Dataset,DataLoader
-import torch
-import numpy as np
-from transformers import GPT2LMHeadModel,AdamW,GPT2Config
-from torch.utils.tensorboard import SummaryWriter
-import torch
-from torch.nn import CrossEntropyLoss
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from tqdm import tnrange, tqdm
-
-def txt2pt(txt,pt,tokenizer,max_len=256):
-    tokenizer.enable_padding(length=max_len+1,pad_id=3)
-    tokenizer.enable_truncation(max_len+1)
-    with open(txt,"r") as f:
-        torch.save(torch.tensor([i.ids for i in tokenizer.encode_batch(f.read().split("\n"))],dtype=torch.int16),pt)
-
-
-
-class gpt2_dataset(Dataset):
-    def __init__(self,pt):
-        super().__init__()
-        self.pt=torch.load(pt)
-
-    def __len__(self):
-        return len(self.pt)
-
-    def __getitem__(self, idx):
-        return self.pt[idx]
+#
+#
+# ##############################################################
+#
+# from torch.utils.data import Dataset,DataLoader
+# import torch
+# import numpy as np
+# from transformers import GPT2LMHeadModel,AdamW,GPT2Config
+# from torch.utils.tensorboard import SummaryWriter
+# import torch
+# from torch.nn import CrossEntropyLoss
+# import torch.nn.functional as F
+# from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
+# from tqdm import tnrange, tqdm
+#
+# def txt2pt(txt,pt,tokenizer,max_len=256):
+#     tokenizer.enable_padding(length=max_len+1,pad_id=3)
+#     tokenizer.enable_truncation(max_len+1)
+#     with open(txt,"r") as f:
+#         torch.save(torch.tensor([i.ids for i in tokenizer.encode_batch(f.read().split("\n"))],dtype=torch.int16),pt)
+#
+#
+#
+# class gpt2_dataset(Dataset):
+#     def __init__(self,pt):
+#         super().__init__()
+#         self.pt=torch.load(pt)
+#
+#     def __len__(self):
+#         return len(self.pt)
+#
+#     def __getitem__(self, idx):
+#         return self.pt[idx]
 
 
 # tokenizer=Tokenizer.from_file("ChEMBL.json")

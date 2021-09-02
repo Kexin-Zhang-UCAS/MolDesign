@@ -1,2 +1,2 @@
-from . import tokennize
+from . import _tokennize
 from . import SMILES

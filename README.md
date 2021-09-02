@@ -1,3 +1,9 @@
+# Developing
+some of of regulations
+1. use pytorch-lightning, only the last system use pl.LightningModule
+2. Use accelarating technique like register buffer
+ 
+
 # Introduction
 This is a long-term support AI & simulation based project for molecule design, including inverse molcule generation and molcule properties prediction.
 # model
