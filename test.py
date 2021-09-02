@@ -26,18 +26,8 @@ if __name__=="__main__":
     # generate_db()
 
     data=loader("chemts.pt",batch_size=600)
-    model=GPT2AR(83,67,128,4,4,ignore_index=1)
+    model=GPT2AR(83,67,128,4,4)
     # print(model.hparams)
     trainer=Trainer(gpus=1,precision=32,auto_lr_find=True,default_root_dir="./check/",max_epochs=8)
     trainer.fit(model,data)
 
-    # import torch
-    # import torch.nn as nn
-    # a=torch.tensor([[0,2,1,2]])
-    # b=torch.tensor([[[0,-float("inf"),-float("inf")],
-    #                  [-float("inf"),1.,-float("inf")],
-    #                  [-float("inf"),1,-float("inf")],
-    #                  [-float("inf"),1.,-float("inf")]]]).transpose(-1,-2)
-    # print(nn.CrossEntropyLoss(ignore_index=2)(b,a))
-    # print(a)
-    # print(b)

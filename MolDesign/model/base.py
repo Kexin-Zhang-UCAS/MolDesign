@@ -1,7 +1,7 @@
 import pytorch_lightning as pl
 import torch.nn as nn
 import torch
-
+import copy
 
 class MLP(nn.Module):
     '''
@@ -78,8 +78,11 @@ class Select(nn.Module):
         return self.F(*args, **kwarg)[self.out_idx]
 
 
-def GetClones(module, N):
-    return nn.Sequential(*[module for i in range(N)])
+def GetClones(module, N,deepcopy=True):
+    if deepcopy:
+        return nn.Sequential(*[copy.deepcopy(module) for i in range(N)])
+    else:
+        return nn.Sequential(*[module for i in range(N)])
 
 
 class FNN(nn.Module):
